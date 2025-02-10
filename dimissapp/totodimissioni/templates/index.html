@@ -1,0 +1,20 @@
+<h1>Totodimissioni</h1>
+<form method="post">
+  {% csrf_token %}
+  <label for="candidato">Candidato:</label>
+  <select name="candidato">
+    {% for candidato in candidati %}
+      <option value="{{ candidato.id }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
+    {% endfor %}
+  </select>
+  <label for="data">Data prevista:</label>
+  <input type="date" name="data">
+  <button type="submit">Invia previsione</button>
+</form>
+
+<h2>Previsioni attuali</h2>
+<ul>
+  {% for previsione in previsioni %}
+    <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
+  {% endfor %}
+</ul>
