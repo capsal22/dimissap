@@ -1,20 +1,127 @@
-<h1>Totodimissioni</h1>
-<form method="post">
-  {% csrf_token %}
-  <label for="candidato">Candidato:</label>
-  <select name="candidato">
-    {% for candidato in candidati %}
-      <option value="{{ candidato.id }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
-    {% endfor %}
-  </select>
-  <label for="data">Data prevista:</label>
-  <input type="date" name="data">
-  <button type="submit">Invia previsione</button>
-</form>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totodimissioni</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            display: flex;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        /* Lato sinistro - cambia colore */
+        .left {
+            flex: 1;
+            background: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.5s ease;
+        }
+        /* Lato destro - contiene la select */
+        .right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        img {
+            width: 30vh;
+            position: absolute;
+            opacity: 0; /* Nascondo l'immagine inizialmente */
+        }
+        select {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
 
-<h2>Previsioni attuali</h2>
-<ul>
-  {% for previsione in previsioni %}
-    <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
-  {% endfor %}
-</ul>
+    <div class="left">
+      {% load static %}
+      <img src="{% static 'candidati/Lorenz.png' %}" alt="Foto Profilo" id="image">
+    </div>
+
+    <div class="right">
+        <div>
+          <h1>Totodimissioni</h1>
+          <form method="post">
+            {% csrf_token %}
+            <label for="candidato">Candidato:</label>
+            <select name="candidato">
+              {% for candidato in candidati %}
+                <option value="{{ candidato.id }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
+              {% endfor %}
+            </select>
+            <label for="data">Data prevista:</label>
+            <input type="date" name="data">
+            <button type="submit">Invia previsione</button>
+          </form>
+          
+          <h2>Previsioni attuali</h2>
+          <ul>
+            {% for previsione in previsioni %}
+              <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
+            {% endfor %}
+          </ul>
+            <h2>Seleziona un colore:</h2>
+            <select id="backgroundSelect">
+                <option value="#1abc9c">Verde Acqua</option>
+                <option value="#3498db">Blu</option>
+                <option value="#e74c3c">Rosso</option>
+                <option value="#f1c40f">Giallo</option>
+                <option value="#9b59b6">Viola</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        const img = document.getElementById("image");
+        const select = document.getElementById("backgroundSelect");
+        const leftSide = document.querySelector(".left");
+
+        // Funzione per far apparire l'immagine con rimbalzo
+        function showImage() {
+            gsap.fromTo(img, 
+                { y: -100, opacity: 0, scale: 0.5 }, 
+                { y: 0, opacity: 1, scale: 1.2, duration: 1.5, ease: "bounce.out" }
+            );
+        }
+
+        // Cambia il colore della parte sinistra quando si seleziona un'opzione
+        select.addEventListener("change", () => {
+            leftSide.style.background = select.value;
+            showImage();
+        });
+
+        // Rimbalzo e cambio colore casuale al passaggio del mouse
+        img.addEventListener("mouseenter", () => {
+            gsap.to(img, { 
+                y: "-=30", 
+                duration: 0.5, 
+                ease: "bounce.out" 
+            });
+
+            // Genera un colore casuale e cambia solo il lato sinistro
+            const randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
+            leftSide.style.background = randomColor;
+        });
+
+        img.addEventListener("mouseleave", () => {
+            gsap.to(img, { y: 0, duration: 0.5, ease: "bounce.out" });
+        });
+    </script>
+
+</body>
+</html>
+
+
