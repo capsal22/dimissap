@@ -14,6 +14,8 @@
             padding: 0;
             width: 100vw;
             height: 100vh;
+            background-color: black;
+            color: white;
         }
 
         .loading-overlay {
@@ -88,6 +90,20 @@
             border: 1px solid #ccc;
         }
 
+        .button_popup {
+            flex: 1;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+
+        }
+
+        #div_buttons {
+            display: flex;
+            flex-direction: row;
+            margin-top: 10px;
+        }
+
         form {
             display: flex;
             flex-direction: column;
@@ -95,26 +111,138 @@
             height: 100%;
             text-align: center;
         }
+
+        table {
+            text-align: left;
+        }
+
+/* CSS */
+.button-49,
+.button-49:after {
+  width: 100%;
+  height: 76px;
+  line-height: 78px;
+  font-size: 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  background: linear-gradient(45deg, transparent 5%, #FF013C 5%);
+  border: 0;
+  color: #fff;
+  letter-spacing: 3px;
+  box-shadow: 6px 0px 0px #00E6F6;
+  outline: transparent;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-49:after {
+  --slice-0: inset(50% 50% 50% 50%);
+  --slice-1: inset(80% -6px 0 0);
+  --slice-2: inset(50% -6px 30% 0);
+  --slice-3: inset(10% -6px 85% 0);
+  --slice-4: inset(40% -6px 43% 0);
+  --slice-5: inset(80% -6px 5% 0);
+  
+  content: 'TOTODIMISSIONI';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 3%, #00E6F6 3%, #00E6F6 5%, #FF013C 5%);
+  text-shadow: -3px -3px 0px #F8F005, 3px 3px 0px #00E6F6;
+  clip-path: var(--slice-0);
+}
+
+.button-49:hover:after {
+  animation: 1s glitch;
+  animation-timing-function: steps(2, end);
+}
+
+@keyframes glitch {
+  0% {
+    clip-path: var(--slice-1);
+    transform: translate(-20px, -10px);
+  }
+  10% {
+    clip-path: var(--slice-3);
+    transform: translate(10px, 10px);
+  }
+  20% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 10px);
+  }
+  30% {
+    clip-path: var(--slice-3);
+    transform: translate(0px, 5px);
+  }
+  40% {
+    clip-path: var(--slice-2);
+    transform: translate(-5px, 0px);
+  }
+  50% {
+    clip-path: var(--slice-3);
+    transform: translate(5px, 0px);
+  }
+  60% {
+    clip-path: var(--slice-4);
+    transform: translate(5px, 10px);
+  }
+  70% {
+    clip-path: var(--slice-2);
+    transform: translate(-10px, 10px);
+  }
+  80% {
+    clip-path: var(--slice-5);
+    transform: translate(20px, -10px);
+  }
+  90% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 0px);
+  }
+  100% {
+    clip-path: var(--slice-1);
+    transform: translate(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .button-49,
+  .button-49:after {
+    width: 100% ;
+    height: 86px;
+    line-height: 88px;
+  }
+}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="box right">
+            <form method="post" style="display: none">
+                {% csrf_token %}
+                <button type="submit" name="btn_azzera" id="btn_azzera">Previsione Attuali</button>
+            </form>
             <form method="post" id="mio-form">
                 <div id="div_form">
                     <h1 id="div_titolo">Fantastico</h1>
                     {% csrf_token %}
                     <label for="candidato">Candidato - Ruolo in azienda:</label>
                     <select name="candidato" id="backgroundSelect" required>
-                        <option value="-">-</option>
+                        <option value="">-</option>
                         {% for candidato in candidati %}
                             <option value="{{ candidato.id }}" data-image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
                         {% endfor %}
                     </select>
-                    <label for="firma">Firma:</label>
+                    <label style="margin-top: 15px" for="firma">Firma:</label>
                     <input type="text" name="firma" required>
-                    <button type="submit">Invia previsione</button>
-                    <button type="button" onclick="show_popup()">Previsione Attuali</button>
+                    <button class="button-49" type="submit">Invia previsione</button>
+                    <div id="div_buttons">
+                        <button class="button_popup" type="button" onclick="show_popup_previsioni()">Previsione Attuali</button>
+                        <button class="button_popup" type="button" onclick="show_popup_utenti()">Utenti censiti</button>
+                    </div>
                 </div>
             </form>
             <div id="div_previsioni" style="display:none">
@@ -130,11 +258,16 @@
                 </table>
             </div>
             <div id="div_utenti_censiti" style="display:none">
-                <ul>
-                    {% for previsione in previsioni %}
-                        <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
-                    {% endfor %}
-                </ul>
+                <table>
+                    <thead></thead>
+                    <tbody>
+                        {% for utente in utenti_censiti %}
+                        <tr>
+                            <td>{{ utente.utente }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -175,10 +308,26 @@
         const loadingOverlay = document.getElementById('loading-overlay');
         const div_titolo = document.getElementById('div_titolo');
 
-        function show_popup() {
+        function show_popup_previsioni() {
             var html_text = document.getElementById("div_previsioni").innerHTML
             Swal.fire({
                 title: "<strong>Exit pool</strong>",
+                icon: "info",
+                html: html_text,
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText: '<i class="fa fa-thumbs-up"></i> Ottimo!',
+                confirmButtonAriaLabel: "Thumbs up, great!",
+                cancelButtonText: '<i class="fa fa-thumbs-down"></i>Grande',
+                cancelButtonAriaLabel: "Thumbs down"
+              });    
+        }
+
+        function show_popup_utenti() {
+            var html_text = document.getElementById("div_utenti_censiti").innerHTML
+            Swal.fire({
+                title: "<strong>Utenti censiti</strong>",
                 icon: "info",
                 html: html_text,
                 showCloseButton: true,
