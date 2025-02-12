@@ -6,37 +6,59 @@
     <title>Totodimissioni</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            display: flex;
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
             height: 100vh;
-            font-family: Arial, sans-serif;
         }
-        /* Lato sinistro - cambia colore */
-        .left {
-            flex: 1;
-            background: #222;
+        
+        .container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.5s ease;
+            width: 100%;
+            height: 100%;
         }
-        /* Lato destro - contiene la select */
-        .right {
+        
+        .box {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #fff;
-            padding: 20px;
-            text-align: center;
         }
+
+        .right, .left {
+            padding: 20px
+        }
+        
+        #div_form {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Layout ORIZZONTALE: Due div affiancati */
+        @media (min-aspect-ratio: 1/1) {
+            .container {
+                flex-direction: row;
+            }
+        }
+        
+        /* Layout VERTICALE: Due div impilati */
+        @media (max-aspect-ratio: 1/1) {
+            .container {
+                flex-direction: column;
+            }
+
+            #div_form {
+                height: 100%;   
+            }
+        }
+
         img {
-            width: 30vh;
+            height: 35%;
             position: absolute;
             opacity: 0; /* Nascondo l'immagine inizialmente */
         }
-        select {
+        select, input, button {
             padding: 10px;
             font-size: 18px;
             border-radius: 5px;
@@ -45,42 +67,45 @@
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="box right">
+                <form method="post">
+                    <div id="div_form">
+                        <h1>Totodimissioni</h1>
+                        {% csrf_token %}
+                        <label for="candidato">Candidato - Ruolo in azienda:</label>
+                        <select name="candidato" id="backgroundSelect">
+                            <option value="-">-</option>
+                            {% for candidato in candidati %}
+                                <option value="{{ candidato.id }}" data-image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="data">Data prevista:</label>
+                        <input type="date" name="data">
+                        <button type="submit">Invia previsione</button>
+                        <h2>Previsioni attuali</h2>
+                    </div>
+                </form>
+            
+                
+                <ul>
+                    {% for previsione in previsioni %}
+                    <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
+                    {% endfor %}
+                </ul>
+                <select id="s" style="display:none">
+                    <option value="#1abc9c">Verde Acqua</option>
+                    <option value="#3498db">Blu</option>
+                    <option value="#e74c3c">Rosso</option>
+                    <option value="#f1c40f">Giallo</option>
+                    <option value="#9b59b6">Viola</option>
+                </select>
+            
+        </div>
 
-    <div class="left">
-      {% load static %}
-      <img src="{% static 'candidati/' %}" alt="Foto Profilo" id="image">
-    </div>
-
-    <div class="right">
-        <div>
-          <h1>Totodimissioni</h1>
-          <form method="post">
-            {% csrf_token %}
-            <label for="candidato">Candidato:</label>
-            <select name="candidato" id="backgroundSelect">
-              {% for candidato in candidati %}
-                <option value="{{ candidato.id }}" data-image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
-              {% endfor %}
-            </select>
-            <label for="data">Data prevista:</label>
-            <input type="date" name="data">
-            <button type="submit">Invia previsione</button>
-          </form>
-          
-          <h2>Previsioni attuali</h2>
-          <ul>
-            {% for previsione in previsioni %}
-              <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
-            {% endfor %}
-          </ul>
-            <h2>Seleziona un colore:</h2>
-            <select id="backgroundSelect">
-                <option value="#1abc9c">Verde Acqua</option>
-                <option value="#3498db">Blu</option>
-                <option value="#e74c3c">Rosso</option>
-                <option value="#f1c40f">Giallo</option>
-                <option value="#9b59b6">Viola</option>
-            </select>
+        {% load static %}
+        <div class="box left">
+            <img src="{% static 'candidati/' %}" alt="Foto Profilo" id="image">
         </div>
     </div>
 
@@ -88,7 +113,7 @@
         const img = document.getElementById("image");
         const select = document.getElementById("backgroundSelect");
         const leftSide = document.querySelector(".left");
-        const path = {% static 'candidati/' %};
+        const path = "{% static 'candidati/' %}";
 
         // Funzione per far apparire l'immagine con rimbalzo
         function showImage() {
@@ -98,11 +123,24 @@
             );
         }
 
+        function removeImage() {
+            gsap.fromTo(img, 
+                { y: -100, opacity: 0, scale: 0.5 }, 
+                { y: 0, opacity: 0, scale: 1.2, duration: 1.5, ease: "bounce.out" }
+            );
+        }
+
         // Cambia il colore della parte sinistra quando si seleziona un'opzione
         select.addEventListener("change", () => {
-            leftSide.style.background = "#1abc9c"; // select.value;
-            img.src = path + select.data-image;
-            showImage();
+            var myimage = event.target.options[event.target.selectedIndex].dataset.image;
+            if (myimage) {
+                leftSide.style.background = "#1abc9c"; // select.value;
+                img.src = path + myimage;
+                showImage();
+            }
+            else {
+                removeImage();
+            } 
         });
 
         // Rimbalzo e cambio colore casuale al passaggio del mouse
