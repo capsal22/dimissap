@@ -48,7 +48,7 @@
 
     <div class="left">
       {% load static %}
-      <img src="{% static 'candidati/Lorenz.png' %}" alt="Foto Profilo" id="image">
+      <img src="{% static 'candidati/' %}" alt="Foto Profilo" id="image">
     </div>
 
     <div class="right">
@@ -57,9 +57,9 @@
           <form method="post">
             {% csrf_token %}
             <label for="candidato">Candidato:</label>
-            <select name="candidato">
+            <select name="candidato" id="backgroundSelect">
               {% for candidato in candidati %}
-                <option value="{{ candidato.id }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
+                <option value="{{ candidato.id }}" image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
               {% endfor %}
             </select>
             <label for="data">Data prevista:</label>
@@ -99,7 +99,7 @@
 
         // Cambia il colore della parte sinistra quando si seleziona un'opzione
         select.addEventListener("change", () => {
-            leftSide.style.background = select.value;
+            leftSide.style.background = "#1abc9c"; // select.value;
             showImage();
         });
 

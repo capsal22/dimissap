@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 class Candidato(models.Model):
     nome = models.CharField(max_length=255)
     ruolo = models.CharField(max_length=255)
+    immagine = models.CharField(max_length=255)
     in_carica = models.BooleanField(default=True)
 
     def __str__(self):
