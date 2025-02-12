@@ -100,6 +100,7 @@
         // Cambia il colore della parte sinistra quando si seleziona un'opzione
         select.addEventListener("change", () => {
             leftSide.style.background = "#1abc9c"; // select.value;
+            img.src = "{% static 'candidati/' %}" + select.image;
             showImage();
         });
 
