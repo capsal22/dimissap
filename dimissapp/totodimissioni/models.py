@@ -10,11 +10,14 @@ class Candidato(models.Model):
     def __str__(self):
         return f"{self.nome} ({self.ruolo})"
 
-class Previsione(models.Model):
-    utente = models.ForeignKey(User, on_delete=models.CASCADE)
-    candidato = models.ForeignKey(Candidato, on_delete=models.CASCADE)
-    data_prevista = models.DateField()
-
 class Risultato(models.Model):
     candidato = models.ForeignKey(Candidato, on_delete=models.CASCADE)
     data_dimissioni = models.DateField(null=True, blank=True)
+    
+class UtentiCensiti(models.Model):
+    utente = models.CharField(max_length=255)
+
+class Previsione(models.Model):
+    utente = models.ForeignKey(UtentiCensiti, on_delete=models.CASCADE)
+    candidato = models.ForeignKey(Candidato, on_delete=models.CASCADE)
+    data_prevista = models.DateField()

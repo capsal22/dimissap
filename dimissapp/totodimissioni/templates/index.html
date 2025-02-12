@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Totodimissioni</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body, html {
             margin: 0;
@@ -64,43 +65,50 @@
             border-radius: 5px;
             border: 1px solid #ccc;
         }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="box right">
-                <form method="post">
-                    <div id="div_form">
-                        <h1>Totodimissioni</h1>
-                        {% csrf_token %}
-                        <label for="candidato">Candidato - Ruolo in azienda:</label>
-                        <select name="candidato" id="backgroundSelect">
-                            <option value="-">-</option>
-                            {% for candidato in candidati %}
-                                <option value="{{ candidato.id }}" data-image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
-                            {% endfor %}
-                        </select>
-                        <label for="data">Data prevista:</label>
-                        <input type="date" name="data">
-                        <button type="submit">Invia previsione</button>
-                        <h2>Previsioni attuali</h2>
-                    </div>
-                </form>
-            
-                
+            <form method="post">
+                <div id="div_form">
+                    <h1>Totodimissioni</h1>
+                    {% csrf_token %}
+                    <label for="candidato">Candidato - Ruolo in azienda:</label>
+                    <select name="candidato" id="backgroundSelect" required>
+                        <option value="-">-</option>
+                        {% for candidato in candidati %}
+                            <option value="{{ candidato.id }}" data-image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="firma">Firma:</label>
+                    <input type="text" name="firma" required>
+                    <button type="submit">Invia previsione</button>
+                    <button type="button" onclick="show_popup()">Previsione Attuali</button>
+                </div>
+            </form>
+            <div id="div_previsioni" style="display:none">
                 <ul>
                     {% for previsione in previsioni %}
-                    <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
+                        <li>{{ previsione.candidato.nome }} → {{ previsione.num_candidato }}</li>
                     {% endfor %}
                 </ul>
-                <select id="s" style="display:none">
-                    <option value="#1abc9c">Verde Acqua</option>
-                    <option value="#3498db">Blu</option>
-                    <option value="#e74c3c">Rosso</option>
-                    <option value="#f1c40f">Giallo</option>
-                    <option value="#9b59b6">Viola</option>
-                </select>
-            
+            </div>
+            <div id="div_utenti_censiti" style="display:none">
+                <ul>
+                    {% for previsione in previsioni %}
+                        <li>{{ previsione.utente.username }} → {{ previsione.candidato.nome }}: {{ previsione.data_prevista }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
 
         {% load static %}
@@ -110,16 +118,49 @@
     </div>
 
     <script>
+        
+        {% if conf_msg %}
+            Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: "{{conf_msg}}",
+                showConfirmButton: false
+            });
+        {% endif %}
+        {% if err_msg %}
+            Swal.fire({
+                position: "top-end",
+                icon: "error",
+                title: "{{err_msg}}",
+                showConfirmButton: false
+            });
+        {% endif %}
         const img = document.getElementById("image");
         const select = document.getElementById("backgroundSelect");
         const leftSide = document.querySelector(".left");
         const path = "{% static 'candidati/' %}";
+        const colori = ["#1abc9c","#3498db","#e74c3c","#f1c40f","#9b59b6"];
 
+        function show_popup() {
+            var html_text = document.getElementById("div_previsioni").innerHTML
+            Swal.fire({
+                title: "<strong>Exit pool</strong>",
+                icon: "info",
+                html: html_text,
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText: '<i class="fa fa-thumbs-up"></i> Ottimo!',
+                confirmButtonAriaLabel: "Thumbs up, great!",
+                cancelButtonText: '<i class="fa fa-thumbs-down"></i>Grande',
+                cancelButtonAriaLabel: "Thumbs down"
+              });    
+        }
         // Funzione per far apparire l'immagine con rimbalzo
         function showImage() {
             gsap.fromTo(img, 
                 { y: -100, opacity: 0, scale: 0.5 }, 
-                { y: 0, opacity: 1, scale: 1.2, duration: 1.5, ease: "bounce.out" }
+                { y: 0, opacity: 1, scale: 1.2, duration: 1.5, delay: 1.0, ease: "bounce.out" }
             );
         }
 
@@ -133,8 +174,9 @@
         // Cambia il colore della parte sinistra quando si seleziona un'opzione
         select.addEventListener("change", () => {
             var myimage = event.target.options[event.target.selectedIndex].dataset.image;
+            var colore = colori[Math.floor(Math.random()*colori.length)];
             if (myimage) {
-                leftSide.style.background = "#1abc9c"; // select.value;
+                leftSide.style.background = colore; // select.value;
                 img.src = path + myimage;
                 showImage();
             }
