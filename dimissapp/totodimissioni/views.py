@@ -39,7 +39,7 @@ def home(request):
                     'err_msg': err_msg
                 })
             
-    previsioni = Previsione.objects.all().values('candidato__nome').annotate(num_candidato=Count('candidato_id')).order_by('num_candidato')
+    previsioni = Previsione.objects.all().values('candidato__nome').annotate(num_candidato=Count('candidato_id')).order_by('-num_candidato')
     for p in previsioni:
         print(p)
     context.update({ "previsioni": previsioni })
