@@ -59,7 +59,7 @@
             <label for="candidato">Candidato:</label>
             <select name="candidato" id="backgroundSelect">
               {% for candidato in candidati %}
-                <option value="{{ candidato.id }}" image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
+                <option value="{{ candidato.id }}" data-image="{{ candidato.immagine }}">{{ candidato.nome }} - {{ candidato.ruolo }}</option>
               {% endfor %}
             </select>
             <label for="data">Data prevista:</label>
@@ -88,6 +88,7 @@
         const img = document.getElementById("image");
         const select = document.getElementById("backgroundSelect");
         const leftSide = document.querySelector(".left");
+        const path = {% static 'candidati/' %};
 
         // Funzione per far apparire l'immagine con rimbalzo
         function showImage() {
@@ -100,7 +101,7 @@
         // Cambia il colore della parte sinistra quando si seleziona un'opzione
         select.addEventListener("change", () => {
             leftSide.style.background = "#1abc9c"; // select.value;
-            img.src = "{% static 'candidati/' %}" + select.image;
+            img.src = path + select.data-image;
             showImage();
         });
 
